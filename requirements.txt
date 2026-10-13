@@ -1,7 +1,53 @@
-tensorflow
-tensorflow-model-optimization
-numpy
-pandas
-matplotlib
-scikit-learn
-jupyter
+# requirements.txt
+# Rebuilt directly from the imports actually present in
+# Model1_V1_25_FINAL1_own.ipynb (checked cell-by-cell, not guessed).
+#
+# IMPORTANT VERSION NOTE:
+# tensorflow_model_optimization (used in optimize.py for pruning) does NOT
+# support Keras 3 as of this writing -- there's still an open, unresolved
+# GitHub issue about it (tensorflow/model-optimization#1119). TensorFlow
+# 2.16+ defaults to Keras 3, which would break the pruning step. So we pin
+# TensorFlow to 2.15.x, the last line that ships Keras 2 as the default
+# `keras` package (no legacy-keras env var workaround needed).
+#
+# If you later want a newer TensorFlow purely for train.py/evaluate.py
+# (no pruning), that's a separate, newer environment -- don't mix the two
+# in one env.
+
+tensorflow[and-cuda]==2.15.1
+
+# --- Notebook uses BOTH `tensorflow.keras.*` and standalone `keras.*` ---
+# `keras` is auto-installed as a dependency of tensorflow==2.15.1 (keras==2.15.x)
+# so it does not need to be listed separately -- listing it here would risk
+# pip resolving a mismatched version.
+
+# --- Model optimization: pruning, used in optimize.py ---
+tensorflow-model-optimization==0.7.5
+
+# --- Data / metrics ---
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.1
+
+# --- Plotting / images ---
+matplotlib==3.9.1
+Pillow==10.4.0
+
+# --- Used only for plot_confusion_matrix in the pruning/eval cells.
+# Note: sklearn's own ConfusionMatrixDisplay (already imported alongside
+# this in the notebook) does the same job without an extra dependency --
+# consider dropping mlxtend when we clean up optimize.py/evaluate.py. ---
+mlxtend==0.23.1
+
+# --- Used for TF/Keras version-string comparisons in optimize.py ---
+packaging==24.1
+
+# ============================================================
+# BROKEN / DEPRECATED IN THE ORIGINAL NOTEBOOK -- FLAGGED, NOT INSTALLED:
+# ============================================================
+# `from keras.wrappers.scikit_learn import KerasClassifier` was removed
+# from Keras entirely years ago (deprecated TF 2.10, gone by 2.12). This
+# import will fail no matter what version we pin. The GridSearchCV +
+# KFold hyperparameter search code that depends on it (used to produce
+# your thesis's Table 4-2/4-3 results) needs to be rewritten using
+# SciKeras instead -- add `scikeras==0.13.0` once we rebuild that script.
